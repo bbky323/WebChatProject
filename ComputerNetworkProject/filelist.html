@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>File List</title>
+  </head>
+  <body>
+    <h1>파일 목록</h1>
+    <ul id="fileList"></ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      // 파일 목록 수신
+      socket.on('fileList', (fileList) => {
+        const listElement = document.getElementById('fileList');
+        listElement.innerHTML = ''; // 기존 목록 초기화
+
+        fileList.forEach((filename) => {
+          const listItem = document.createElement('li');
+          const downloadLink = document.createElement('a');
+          downloadLink.href = `/download?filename=${filename}`;
+          downloadLink.textContent = filename;
+          listItem.appendChild(downloadLink);
+          listElement.appendChild(listItem);
+        });
+      });
+    </script>
+  </body>
+</html>

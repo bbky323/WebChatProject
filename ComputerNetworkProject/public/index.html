@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket Chat</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+      html, body {
+        height: 100%;
+      }
+      .wrapper {
+        background-color: #e0d1d1;
+        height: 100%;
+        width: 50%;
+      }
+      .title {
+        background-color: #e0d1d1;
+        height: 5%;
+        width: 98%;
+        margin-left: 2%;
+        font-size: 30px;
+        font-style: oblique;
+      }
+      .text {
+        background-color: #fff;
+        width: 90%;
+        margin: auto;
+        overflow-y: scroll;
+        height: 80vh;
+      }
+      .chatting {
+        font-style: italic;
+        background-color: #e0d1d1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1 class="title">Chatting App</h1>
+      <div class="chatting" id="chat">
+        <ul class="text" id="messages"></ul>
+        <form id="messageForm">
+          <input type="text" id="messageInput" placeholder="Type your message" autocomplete="off" />
+          <button id="sendMessageButton">전송</button>
+        </form>
+      </div>
+
+      <!-- 파일 업로드 버튼 추가 -->
+      <div class="upload">
+        <form id="uploadForm" enctype="multipart/form-data">
+          <input type="file" id="fileInput" name="file" />
+          <button id="uploadButton">업로드</button>
+        </form>
+      </div>
+      
+      <!-- 파일 목록 보기 버튼 -->
+      <button id="viewFileListButton">파일 목록</button>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      // 메시지 전송
+      const messageInput = document.getElementById('messageInput');
+      const messageForm = document.getElementById('messageForm');
+      messageForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (message) {
+          socket.emit('chat message', message);
+          messageInput.value = '';
+        }
+      });
+
+      // 메시지 수신
+      socket.on('chat message', (data) => {
+        const messages = document.getElementById('messages');
+        const li = document.createElement('li');
+        if (data.username === 'system') {
+          li.textContent = data.message;
+        } else {
+          li.textContent = `${data.username}: ${data.message}`;
+        }
+        messages.appendChild(li);
+
+        // 자동 스크롤
+        messages.scrollTop = messages.scrollHeight;
+      });
+
+      // 사용자 이름 설정
+      const username = prompt('사용자 이름을 입력하세요:');
+      if (username) {
+        socket.emit('setUsername', username);
+      }
+
+      // 파일 업로드
+      const uploadForm = document.getElementById('uploadForm');
+      const fileInput = document.getElementById('fileInput');
+      const uploadButton = document.getElementById('uploadButton');
+      uploadForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const file = fileInput.files[0];
+        if (file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('username', username);
+          fetch('/upload', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.text())
+          .then(result => {
+            console.log(result);
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        }
+      });
+
+      // 파일 업로드 메시지 처리
+      socket.on('file uploaded', (data) => {
+        const messages = document.getElementById('messages');
+        const li = document.createElement('li');
+        // 이미지 파일의 경우 표시
+        if (data.filetype === 'image') {
+          const img = document.createElement('img');
+          img.src = `/uploads/${data.filename}`;
+          img.style.maxWidth = '300px';
+          li.textContent = `${data.username}: `;
+          messages.appendChild(li);
+          li.appendChild(img);
+        } else {
+          li.textContent = `${data.username}님께서 파일을 업로드하였습니다.`;
+          messages.appendChild(li);
+        }
+
+        // 자동 스크롤
+        messages.scrollTop = messages.scrollHeight;
+      });
+
+      // 파일 목록으로 이동
+      const viewFileListButton = document.getElementById('viewFileListButton');
+      viewFileListButton.addEventListener('click', () => {
+        window.open('/filelist.html');
+      });
+    </script>
+  </body>
+</html>
