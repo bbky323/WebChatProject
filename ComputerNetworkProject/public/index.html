@@ -1,239 +1,308 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>WebSocket Chat</title>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-      html, body {
-        height: 100%;
-        margin: 0;
-        font-family: 'Times New Roman', Times, serif;
-        background-color: #f0f0f0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .wrapper {
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        width: 90%;
-        max-width: 600px;
-        padding: 20px;
-        box-sizing: border-box;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-      .title {
-        font-size: 26px;
-        color: #333;
-        text-align: center;
-        margin-bottom: 20px;
-        font-weight: bold;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 10px;
-      }
-      .chatting {
-        display: flex;
-        flex-direction: column;
-        height: 60vh;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        padding: 15px;
-        box-sizing: border-box;
-        background-color: #fafafa;
-      }
-      .text {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding: 10px;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-        margin-bottom: 10px;
-        background-color: #fff;
-      }
-      .text li {
-        list-style: none;
-        margin-bottom: 10px;
-        padding: 10px;
-        border-radius: 10px;
-        background-color: #e9e9e9;
-        border: 1px solid #ddd;
-      }
-      .text li:nth-child(odd) {
-        background-color: #dcdcdc;
-      }
-      #messageForm {
-        display: flex;
-      }
-      #messageInput {
-        flex-grow: 1;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px 0 0 5px;
-        outline: none;
-      }
-      #sendMessageButton {
-        padding: 10px 20px;
-        border: 1px solid #ccc;
-        border-left: none;
-        border-radius: 0 5px 5px 0;
-        background-color: #333;
-        color: white;
-        cursor: pointer;
-      }
-      .upload {
-        margin-top: 20px;
-      }
-      #uploadForm {
-        display: flex;
-        align-items: center;
-      }
-      #fileInput {
-        flex-grow: 1;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px 0 0 5px;
-      }
-      #uploadButton {
-        padding: 10px 20px;
-        border: 1px solid #ccc;
-        border-left: none;
-        border-radius: 0 5px 5px 0;
-        background-color: #555;
-        color: white;
-        cursor: pointer;
-      }
-      #viewFileListButton {
-        margin-top: 20px;
-        padding: 10px;
-        width: 100%;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background-color: #444;
-        color: white;
-        cursor: pointer;
-      }
-      img {
-        max-width: 100%;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        padding: 5px;
-        background-color: #fff;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrapper">
-      <h1 class="title">Chatting App</h1>
-      <div class="chatting">
-        <ul class="text" id="messages"></ul>
-        <form id="messageForm">
-          <input type="text" id="messageInput" placeholder="Type your message" autocomplete="off" />
-          <button id="sendMessageButton">전송</button>
-        </form>
-      </div>
-
-      <!-- 파일 업로드 버튼 추가 -->
-      <div class="upload">
-        <form id="uploadForm" enctype="multipart/form-data">
-          <input type="file" id="fileInput" name="file" />
-          <button id="uploadButton">업로드</button>
-        </form>
-      </div>
-      
-      <!-- 파일 목록 보기 버튼 -->
-      <button id="viewFileListButton">파일 목록</button>
+<head>
+  <title>Web Chat Project</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Times New Roman', Times, serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .wrapper {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      width: 450px;
+      padding: 20px;
+      box-sizing: border-box;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    .title {
+      font-size: 26px;
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+    .chatting {
+      display: flex;
+      flex-direction: column;
+      height: 400px; /* 고정된 높이 */
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      box-sizing: border-box;
+      background-color: #fafafa;
+      overflow: hidden; /* 추가 */
+    }
+    .text {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      background-color: #fff;
+    }
+    .text li {
+      list-style: none;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #e9e9e9;
+      border: 1px solid #ddd;
+      word-break: break-word; /* 추가 */
+    }
+    .text li:nth-child(odd) {
+      background-color: #dcdcdc;
+    }
+    #messageForm {
+      display: flex;
+    }
+    #messageInput {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px 0 0 5px;
+      outline: none;
+    }
+    #sendMessageButton {
+      padding: 10px 20px;
+      border: 1px solid #ccc;
+      border-left: none;
+      border-radius: 0 5px 5px 0;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+    .upload {
+      margin-top: 20px;
+    }
+    #uploadForm {
+      display: flex;
+      align-items: center;
+    }
+    #fileInput {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px 0 0 5px;
+    }
+    #uploadButton {
+      padding: 10px 20px;
+      border: 1px solid #ccc;
+      border-left: none;
+      border-radius: 0 5px 5px 0;
+      background-color: #555;
+      color: white;
+      cursor: pointer;
+      width: 100px; /* 고정된 크기 */
+    }
+    #viewFileListButton {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      padding: 5px;
+      background-color: #fff;
+    }
+    .user-list-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+    .user-list {
+      position: absolute;
+      top: 50px;
+      right: 10px;
+      width: 150px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+    .user-list select {
+      width: 100%;
+      padding: 5px;
+      border: none;
+      background-color: transparent;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1 class="title">Web Chat</h1>
+    <button class="user-list-button" onclick="toggleUserList()">사용자 목록</button>
+    <div class="user-list" id="userListContainer">
+      <select id="userList" size="5"></select>
     </div>
-    
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-      const socket = io();
+    <div class="chatting">
+      <ul class="text" id="messages"></ul>
+      <form id="messageForm">
+        <input type="text" id="messageInput" placeholder="메시지를 입력해주세요" autocomplete="off" />
+        <button id="sendMessageButton">전송</button>
+      </form>
+    </div>
+    <div class="upload">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="file" />
+        <button id="uploadButton">업로드</button>
+      </form>
+    </div>
+    <button id="viewFileListButton">파일 목록</button>
+  </div>
 
-      // 메시지 전송
-      const messageInput = document.getElementById('messageInput');
-      const messageForm = document.getElementById('messageForm');
-      messageForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const message = messageInput.value.trim();
-        if (message) {
-          socket.emit('chat message', message);
-          messageInput.value = '';
-        }
-      });
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
 
-      // 메시지 수신
-      socket.on('chat message', (data) => {
-        const messages = document.getElementById('messages');
-        const li = document.createElement('li');
-        if (data.username === 'system') {
-          li.textContent = data.message;
-          li.style.fontStyle = 'italic';
-          li.style.color = '#888';
-        } else {
-          li.textContent = `${data.username}: ${data.message}`;
-        }
-        messages.appendChild(li);
-
-        // 자동 스크롤
-        messages.scrollTop = messages.scrollHeight;
-      });
-
-      // 사용자 이름 설정
-      const username = prompt('사용자 이름을 입력하세요:');
-      if (username) {
-        socket.emit('setUsername', username);
+    // 메시지 전송
+    const messageInput = document.getElementById('messageInput');
+    const messageForm = document.getElementById('messageForm');
+    messageForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (message) {
+        socket.emit('chat message', message);
+        messageInput.value = '';
       }
+    });
 
-      // 파일 업로드
-      const uploadForm = document.getElementById('uploadForm');
-      const fileInput = document.getElementById('fileInput');
-      const uploadButton = document.getElementById('uploadButton');
-      uploadForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const file = fileInput.files[0];
-        if (file) {
-          const formData = new FormData();
-          formData.append('file', file);
-          formData.append('username', username);
-          fetch('/upload', {
-            method: 'POST',
-            body: formData
-          })
-          .then(response => response.text())
-          .then(result => {
-            console.log(result);
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
-        }
-      });
+    // 메시지 수신
+    socket.on('chat message', (data) => {
+      const messages = document.getElementById('messages');
+      const li = document.createElement('li');
+      if (data.username === 'system') {
+        li.textContent = data.message;
+        li.style.fontStyle = 'italic';
+        li.style.color = '#888';
+      } else {
+        li.textContent = `${data.username}: ${data.message}`;
+      }
+      messages.appendChild(li);
+      messages.scrollTop = messages.scrollHeight;
+    });
 
-      // 파일 업로드 메시지 처리
-      socket.on('file uploaded', (data) => {
-        const messages = document.getElementById('messages');
-        const li = document.createElement('li');
-        // 이미지 파일의 경우 표시
-        if (data.filetype === 'image') {
-          const img = document.createElement('img');
-          img.src = `/uploads/${data.filename}`;
-          li.textContent = `${data.username}: `;
-          messages.appendChild(li);
-          li.appendChild(img);
+    // 사용자 이름 설정
+    const setUsername = () => {
+      const requestUsername = (errorMessage) => {
+        const username = prompt(errorMessage ? errorMessage : '사용자 이름을 입력하세요:');
+        if (username) {
+          socket.emit('setUsername', username);
         } else {
-          li.textContent = `${data.username}님께서 파일을 업로드하였습니다.`;
-          messages.appendChild(li);
+          // 사용자가 확인 버튼을 누르지 않고 그냥 들어왔을 때의 처리
+          socket.emit('setUsername', ''); // 빈 문자열 전송
         }
+      };
 
-        // 자동 스크롤
-        messages.scrollTop = messages.scrollHeight;
+      let errorMessage = '';
+
+      socket.on('usernameError', (error) => {
+        errorMessage = error;
+        requestUsername(errorMessage);
       });
 
-      // 파일 목록으로 이동
-      const viewFileListButton = document.getElementById('viewFileListButton');
-      viewFileListButton.addEventListener('click', () => {
-        window.open('/filelist.html');
+      requestUsername();
+    };
+
+    // 페이지 로드 시 사용자 이름 설정
+    window.onload = setUsername;
+
+
+    // 파일 업로드
+    const uploadForm = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('fileInput');
+    const uploadButton = document.getElementById('uploadButton');
+    uploadForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const file = fileInput.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('username', username);
+        fetch('/upload', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.text())
+        .then(result => {
+          console.log(result);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      }
+    });
+
+    // 파일 업로드 메시지 처리
+    socket.on('file uploaded', (data) => {
+      const messages = document.getElementById('messages');
+      const li = document.createElement('li');
+      if (data.filetype === 'image') {
+        const img = document.createElement('img');
+        img.src = `/uploads/${data.filename}`;
+        li.textContent = `${data.username}: `;
+        messages.appendChild(li);
+        li.appendChild(img);
+      } else {
+        li.textContent = `${data.username}님께서 파일을 업로드하였습니다.`;
+        messages.appendChild(li);
+      }
+      messages.scrollTop = messages.scrollHeight;
+    });
+
+    // 파일 목록으로 이동
+    const viewFileListButton = document.getElementById('viewFileListButton');
+    viewFileListButton.addEventListener('click', () => {
+      window.open('/filelist.html');
+    });
+
+    // 사용자 목록 업데이트
+    socket.on('userList', (users) => {
+      const userList = document.getElementById('userList');
+      userList.innerHTML = '';
+      users.forEach((user) => {
+        const option = document.createElement('option');
+        option.textContent = user;
+        userList.appendChild(option);
       });
-    </script>
-  </body>
+    });
+
+    function toggleUserList() {
+      const userListContainer = document.getElementById('userListContainer');
+      if (userListContainer.style.display === 'none' || userListContainer.style.display === '') {
+        userListContainer.style.display = 'block';
+      } else {
+        userListContainer.style.display = 'none';
+      }
+    }
+  </script>
+</body>
 </html>
