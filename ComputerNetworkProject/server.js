@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
     // 업로드된 파일 정보를 fileList에 추가
     fileList.push(file.filename);
 
-    // 업로드된 파일 정보를 클라이언트에게 방송
+    // 업로드된 파일 정보를 클라이언트에게 발송
     io.emit('file uploaded', {
       username: req.body.username,
       filename: file.filename,

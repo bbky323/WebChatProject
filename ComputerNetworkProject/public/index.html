@@ -182,6 +182,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
+    let username = '';
 
     // 메시지 전송
     const messageInput = document.getElementById('messageInput');
@@ -213,7 +214,7 @@
     // 사용자 이름 설정
     const setUsername = () => {
       const requestUsername = (errorMessage) => {
-        const username = prompt(errorMessage ? errorMessage : '사용자 이름을 입력하세요:');
+        username = prompt(errorMessage ? errorMessage : '사용자 이름을 입력하세요:');
         if (username) {
           socket.emit('setUsername', username);
         } else {
